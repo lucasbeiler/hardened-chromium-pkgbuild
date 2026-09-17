@@ -1,5 +1,6 @@
-# Maintainer: Christian Heusel <gromit@archlinux.org>
-# Maintainer: Jonathan Grotelüschen <tippfehlr@archlinux.org>
+# Maintainer: Lucas Beiler <lucasbeiler@protonmail.com>
+# Maintainer (Arch Linux): Christian Heusel <gromit@archlinux.org>
+# Maintainer (Arch Linux): Jonathan Grotelüschen <tippfehlr@archlinux.org>
 # Contributor: Evangelos Foutras <foutrelis@archlinux.org>
 # Contributor: Pierre Schmitz <pierre@archlinux.de>
 # Contributor: Jan "heftig" Steffens <jan.steffens@gmail.com>
@@ -82,6 +83,7 @@ optdepends=('pipewire: WebRTC desktop sharing under Wayland'
 options=('!lto') # Chromium adds its own flags for ThinLTO
 source=(https://commondatastorage.googleapis.com/chromium-browser-official/chromium-$pkgver-lite.tar.xz
         https://github.com/foutrelis/chromium-launcher/archive/v$_launcher_ver/chromium-launcher-$_launcher_ver.tar.gz
+        https://github.com/secureblue/Trivalent/archive/4c97a3d116e635b3d77da7341c2b1050c5d7c3b7.tar.gz
         chromium-138-nodejs-version-check.patch
         chromium-145-fix-SYS_SECCOMP.patch
         chromium-147-revert-clang-no-lifetime-dse-flag.patch
@@ -104,6 +106,7 @@ source=(https://commondatastorage.googleapis.com/chromium-browser-official/chrom
         glibc-2.42-baud-rate-fix.patch)
 sha256sums=('2e2f36e3cd1ebc4ad57fd310774a5e5e9db77883d5f9374fedeaabd3c103b819'
             '213e50f48b67feb4441078d50b0fd431df34323be15be97c55302d3fdac4483a'
+            '5cf93e2c0a06f1e41f19f2e99b97b3fc8efcf61b58ba61b17c71850a6569fc28'
             '11a96ffa21448ec4c63dd5c8d6795a1998d8e5cd5a689d91aea4d2bdd13fb06e'
             '4fc040a0656a0a524dd8ad090cd129fc5b6cb21adcc66be82080165789e8c13e'
             'c382830318c5b37826ecf44f3ba9def6be8affdad1bce819ecb83f3222ff4b3a'
@@ -133,34 +136,8 @@ fi
 
 # Possible replacements are listed in build/linux/unbundle/replace_gn_files.py
 # Keys are the names in the above script; values are the dependencies in Arch
-declare -gA _system_libs=(
-  [brotli]=brotli
-  [dav1d]=dav1d
-  #[ffmpeg]=ffmpeg    # YouTube playback stopped working in Chromium 120
-  [flac]=flac
-  [fontconfig]=fontconfig
-  [freetype]=freetype2
-  [harfbuzz]=harfbuzz
-  [highway]=highway
-  #[icu]=icu
-  #[jsoncpp]=jsoncpp  # needs libstdc++
-  #[libaom]=aom
-  #[libavif]=libavif  # needs -DAVIF_ENABLE_EXPERIMENTAL_GAIN_MAP=ON
-  [libdrm]=libdrm
-  [libjpeg]=libjpeg-turbo
-  # [libpng]=libpng
-  #[libvpx]=libvpx
-  [libwebp]=libwebp
-  [libxml]=libxml2
-  [libxslt]=libxslt
-  [openh264]=openh264
-  [opus]=opus
-  #[re2]=re2          # needs libstdc++
-  #[snappy]=snappy    # needs libstdc++
-  #[woff2]=woff2      # needs libstdc++
-  [zlib]=minizip
-  [zstd]=zstd
-)
+declare -gA _system_libs=()
+
 _unwanted_bundled_libs=(
   $(printf "%s\n" ${!_system_libs[@]} | sed 's/^libjpeg$/&_turbo/')
 )
@@ -205,9 +182,6 @@ prepare() {
 
   # Allow libclang_rt.builtins from compiler-rt >= 16 to be used
   patch -Np1 -i ../compiler-rt-adjust-paths.patch
-
-  # Increase _FORTIFY_SOURCE level to match Arch's default flags
-  patch -Np1 -i ../increase-fortify-level.patch
 
   # clang 22 lacks -fsanitize-ignore-for-ubsan-feature, which is needed to use
   # -fsanitize=array-bounds without triggering UBSan feature detection. Without
@@ -261,6 +235,20 @@ prepare() {
   patch -Np1 -i ../chromium-153-typescript.patch
 
   patch -Np1 -i ../chromium-153-crubit.patch
+
+  # Trivalent hardening patches (https://github.com/secureblue/Trivalent)
+  # Apply every *.patch under patches/, skipping anything that lives inside a
+  # directory named "fixes", "fedora" or "branding" (those are specific to
+  # Trivalent's own Fedora/RPM packaging and UI branding, not relevant here).
+  local _trivalent_patch
+  while IFS= read -r -d '' _trivalent_patch; do
+    echo "==> Applying Trivalent patch: ${_trivalent_patch#"$srcdir/trivalent/patches/"}"
+    patch -Np1 -i "$_trivalent_patch"
+  done < <(find "$srcdir/Trivalent-4c97a3d116e635b3d77da7341c2b1050c5d7c3b7/patches" -type f -name '*.patch' \
+             -not -path '*/fixes/*' \
+             -not -path '*/fedora/*' \
+             -not -path '*/branding/*' \
+             -print0 | sort -z)
 
   # Link to system tools required by the build
   mkdir -p third_party/node/linux/node-linux-x64/bin \
@@ -353,6 +341,21 @@ build() {
     'moc_qt6_path="/usr/lib/qt6"'
     "google_api_key=\"$_google_api_key\""
     'use_clang_modules=false'
+    'is_clang=true'
+    'v8_enable_drumbrake=true'
+    'enable_reporting=false'
+    'enable_remoting=false'
+    'enable_vr=false'
+    'safe_browsing_use_unrar=false'
+    'is_cfi=true'
+    'use_cfi_cast=true'
+    'use_static_angle=true'
+    'angle_shared_libvulkan=false'
+    'enable_swiftshader=false'
+    'enable_swiftshader_vulkan=false'
+    'dawn_use_swiftshader=false'
+    'angle_enable_swiftshader=false'
+    'angle_has_histograms=false'
   )
 
   if [[ -n ${_system_libs[icu]+set} ]]; then
@@ -396,14 +399,7 @@ build() {
 
   # https://github.com/ungoogled-software/ungoogled-chromium-archlinux/issues/123
   CFLAGS=${CFLAGS/-fexceptions}
-  CFLAGS=${CFLAGS/-fcf-protection}
   CXXFLAGS=${CXXFLAGS/-fexceptions}
-  CXXFLAGS=${CXXFLAGS/-fcf-protection}
-
-  # This appears to cause random segfaults when combined with ThinLTO
-  # https://bugs.archlinux.org/task/73518
-  CFLAGS=${CFLAGS/-fstack-clash-protection}
-  CXXFLAGS=${CXXFLAGS/-fstack-clash-protection}
 
   # https://crbug.com/957519#c122
   CXXFLAGS=${CXXFLAGS/-Wp,-D_GLIBCXX_ASSERTIONS}
@@ -468,10 +464,6 @@ package() {
     libEGL.so
     libGLESv2.so
 
-    # SwiftShader ICD
-    libvk_swiftshader.so
-    libvulkan.so.1
-    vk_swiftshader_icd.json
   )
 
   if [[ -z ${_system_libs[icu]+set} ]]; then
