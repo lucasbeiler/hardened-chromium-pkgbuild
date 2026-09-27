@@ -1,5 +1,6 @@
-# Maintainer: Christian Heusel <gromit@archlinux.org>
-# Maintainer: Jonathan Grotelüschen <tippfehlr@archlinux.org>
+# Maintainer: Lucas Beiler <lucasbeiler@protonmail.com>
+# Maintainer (Arch Linux): Christian Heusel <gromit@archlinux.org>
+# Maintainer (Arch Linux): Jonathan Grotelüschen <tippfehlr@archlinux.org>
 # Contributor: Evangelos Foutras <foutrelis@archlinux.org>
 # Contributor: Pierre Schmitz <pierre@archlinux.de>
 # Contributor: Jan "heftig" Steffens <jan.steffens@gmail.com>
@@ -7,7 +8,7 @@
 # Contributor: Caleb Maclennan <caleb@alerque.com>
 
 pkgname=chromium
-pkgver=153.0.8010.36
+pkgver=154.0.8037.57
 pkgrel=1
 _launcher_ver=8
 _manual_clone=0
@@ -57,6 +58,7 @@ depends=(
 makedepends=(
   'clang'
   'compiler-rt'
+  'esbuild'
   'git'
   'gn'
   'go'
@@ -72,6 +74,7 @@ makedepends=(
   'rust'
   'rust-bindgen'
   'typescript'
+  'vulkan-headers'
 )
 optdepends=('pipewire: WebRTC desktop sharing under Wayland'
             'kdialog: support for native dialogs in Plasma'
@@ -80,45 +83,51 @@ optdepends=('pipewire: WebRTC desktop sharing under Wayland'
             'org.freedesktop.secrets: password storage backend on GNOME, KDE and Xfce'
             'upower: Battery Status API support')
 options=('!lto') # Chromium adds its own flags for ThinLTO
-source=(https://commondatastorage.googleapis.com/chromium-browser-official/chromium-$pkgver-lite.tar.xz
+source=(https://github.com/chromium-linux-tarballs/chromium-tarballs/releases/download/$pkgver/chromium-$pkgver-linux.tar.xz
         https://github.com/foutrelis/chromium-launcher/archive/v$_launcher_ver/chromium-launcher-$_launcher_ver.tar.gz
+        https://github.com/secureblue/Trivalent/archive/94682b5d44f88dc70458ddd0bad79c4a961b4132.tar.gz
         chromium-138-nodejs-version-check.patch
         chromium-145-fix-SYS_SECCOMP.patch
         chromium-147-revert-clang-no-lifetime-dse-flag.patch
         chromium-147-rust-1.95-bytemuck.patch
         chromium-149-drop-unknown-clang-flag.patch
         chromium-149-use-of-undeclared-identifier-ERROR.patch
-        chromium-149-build-with-wasm-rollup.patch
         chromium-150-revert-avx-flag-change.patch
-        chromium-152-fix-gn-no-public_inputs.patch
         chromium-152-unbundle-minizip-undo-unicode.patch
         chromium-152-unbundle-opus-devtools.patch
         chromium-153-hermetic-python.patch
         chromium-153-iamf-tools-unbundled-opus.patch
-        chromium-153-typescript.patch
-        chromium-153-crubit.patch
+        chromium-154-use-system-esbuild.patch
+        chromium-154-fix-gn-no-public_inputs.patch
+        chromium-154-typescript.patch
+        chromium-154-crubit.patch
+        chromium-154-remove-private_verification_tokens.patch
+        chromium-154-build-with-wasm-rollup.patch
         compiler-rt-adjust-paths.patch
         increase-fortify-level.patch
         enable-widevine-arm64.patch
         use-oauth2-client-switches-as-default.patch
         glibc-2.42-baud-rate-fix.patch)
-sha256sums=('645f64566cfbb780747430d53ff3656f03639f89fed9544c1eadd4c17e7b1c82'
+sha256sums=('2b2c55e73cbf9ce4103f8f87829d0b9ce61916152e3deb1596d451d5e291deae'
             '213e50f48b67feb4441078d50b0fd431df34323be15be97c55302d3fdac4483a'
+            '2f2b4732dd841afaaa57a2d845970e8921ec0ef79d12062d6efc6e3c4132f4f7'
             '11a96ffa21448ec4c63dd5c8d6795a1998d8e5cd5a689d91aea4d2bdd13fb06e'
             '4fc040a0656a0a524dd8ad090cd129fc5b6cb21adcc66be82080165789e8c13e'
             'c382830318c5b37826ecf44f3ba9def6be8affdad1bce819ecb83f3222ff4b3a'
             'b9e6339221efe03540ffb360c161d93604a1fc93a5a1c53e5e9849066f987d05'
             '1b5190fa030850cf30a97dc90e35b31f3097243c88743fbfaedbd64ea80f1327'
             '951514535be65f0e2f84e82305d96292be1da353c1427ba1048ea24be70003c4'
-            'c4df27d25d298ac95d85e6f06b558b73bb67de5110a19a0228cb7f8519291ea5'
             '5f6ccb7b945c8a13c690493723bad816b36f2f25792d47e677b56f8200907e60'
-            '50115642099ac131f40c419cbd12ed72e352538002d4bdc11ab657335891d03b'
             '890e5d98088ef1c7c075a551442f03385d1db266cad8a65576704a22720683f9'
             '3276453f2ce655b6286476f48d4df837be952d9447afa46583f79ec71f2288c3'
             'ebf74154266d0b6d6cc957c413f845052c5fcfce7745befb8821595cdf3f7d49'
             '2ab9fbe653829ce692f83ee780aad07e8c83a6686e51ab9459ad736cfa2850ee'
-            '44c86a7c26d726559d5bd06a64f81e6bcced7ab4dc949c899e4fd2c64ff37a16'
-            'a20e615fa03713e464fc3f2966c84e2130b6d942a4c8b5919ba0bf8320d39ed4'
+            '017e32d7c92a2c3d672e0535d52a27be1b805aa4dfe7d29cb1c1552460ccad64'
+            '7f39267af6bd60cc19244ca43684e18a0bb441b197fa1627ca4c4d97fbc759ca'
+            'd061cf4aeba21b1d2edabc28afd38106246b99aa5ec699e1b9ee5ca8b76d8a23'
+            'a82147f07982d49b0744c53c5fc038d4de1ef7d9a828b6280abbb49462b623eb'
+            '0cc5f7c7ccf0927c0bbfdb9e797dc5b1f4c9f021e8a01d943121d3ee4e6416bf'
+            'cfef4a4eeed2272b3101131af6c1bb63c7932a715c36634a1e027f770634e013'
             'ec8e49b7114e2fa2d359155c9ef722ff1ba5fe2c518fa48e30863d71d3b82863'
             'd634d2ce1fc63da7ac41f432b1e84c59b7cceabf19d510848a7cff40c8025342'
             '5ee4bb69379ac0cea7946c9f8f4ca9e20e0a9e4ee2ee9121eb0ebbb94dd7e928'
@@ -133,33 +142,7 @@ fi
 
 # Possible replacements are listed in build/linux/unbundle/replace_gn_files.py
 # Keys are the names in the above script; values are the dependencies in Arch
-declare -gA _system_libs=(
-  [brotli]=brotli
-  [dav1d]=dav1d
-  #[ffmpeg]=ffmpeg    # YouTube playback stopped working in Chromium 120
-  [flac]=flac
-  [fontconfig]=fontconfig
-  [freetype]=freetype2
-  [harfbuzz]=harfbuzz
-  #[icu]=icu
-  #[jsoncpp]=jsoncpp  # needs libstdc++
-  #[libaom]=aom
-  #[libavif]=libavif  # needs -DAVIF_ENABLE_EXPERIMENTAL_GAIN_MAP=ON
-  [libdrm]=libdrm
-  [libjpeg]=libjpeg-turbo
-  # [libpng]=libpng
-  #[libvpx]=libvpx
-  [libwebp]=libwebp
-  [libxml]=libxml2
-  [libxslt]=libxslt
-  [openh264]=openh264
-  [opus]=opus
-  #[re2]=re2          # needs libstdc++
-  #[snappy]=snappy    # needs libstdc++
-  #[woff2]=woff2      # needs libstdc++
-  [zlib]=minizip
-  [zstd]=zstd
-)
+declare -gA _system_libs=()
 _unwanted_bundled_libs=(
   $(printf "%s\n" ${!_system_libs[@]} | sed 's/^libjpeg$/&_turbo/')
 )
@@ -206,7 +189,7 @@ prepare() {
   patch -Np1 -i ../compiler-rt-adjust-paths.patch
 
   # Increase _FORTIFY_SOURCE level to match Arch's default flags
-  patch -Np1 -i ../increase-fortify-level.patch
+  # patch -Np1 -i ../increase-fortify-level.patch
 
   # clang 22 lacks -fsanitize-ignore-for-ubsan-feature, which is needed to use
   # -fsanitize=array-bounds without triggering UBSan feature detection. Without
@@ -222,8 +205,6 @@ prepare() {
   # https://crbug.com/456218403
   patch -Np1 -i ../chromium-145-fix-SYS_SECCOMP.patch
 
-  patch -Np1 -i ../chromium-149-build-with-wasm-rollup.patch
-
   patch -Np1 -i ../chromium-147-rust-1.95-bytemuck.patch
 
   # enable widevine for arm64
@@ -238,9 +219,6 @@ prepare() {
   # Credit: https://github.com/ungoogled-software/ungoogled-chromium/pull/3837
   patch -Np1 -i ../chromium-150-revert-avx-flag-change.patch
 
-  # Just the reverted commit 8dab8b761385b7946588232e4e2a8c116f9293c3
-  patch -Np1 -i "$srcdir/chromium-152-fix-gn-no-public_inputs.patch" -d third_party/devtools-frontend/src
-
   patch -Np1 -i ../chromium-152-unbundle-minizip-undo-unicode.patch
 
   patch -Np1 -i ../chromium-152-unbundle-opus-devtools.patch
@@ -254,12 +232,34 @@ prepare() {
   # for the unbundled system Opus build
   patch -Np1 -i ../chromium-153-iamf-tools-unbundled-opus.patch
 
+  patch -Np1 -i ../chromium-154-use-system-esbuild.patch
+
+  patch -Np1 -i ../chromium-154-fix-gn-no-public_inputs.patch
+
   # Work around TypeScript becoming a build dependency: disable tsgo for the
   # WebUI and point devtools at the system tsc binary
-  # https://github.com/ungoogled-software/ungoogled-chromium/pull/3946
-  patch -Np1 -i ../chromium-153-typescript.patch
+  # https://github.com/ungoogled-software/ungoogled-chromium/pull/3966
+  patch -Np1 -i ../chromium-154-typescript.patch
 
-  patch -Np1 -i ../chromium-153-crubit.patch
+  patch -Np1 -i ../chromium-154-crubit.patch
+
+  patch -Np1 -i ../chromium-154-remove-private_verification_tokens.patch
+
+  patch -Np1 -i ../chromium-154-build-with-wasm-rollup.patch
+
+  # Trivalent hardening patches (https://github.com/secureblue/Trivalent)
+  # Apply every *.patch under patches/, skipping anything that lives inside a
+  # directory named "fixes", "fedora" or "branding" (those are specific to
+  # Trivalent's own Fedora/RPM packaging and UI branding, not relevant here).
+  local _trivalent_patch
+  while IFS= read -r -d '' _trivalent_patch; do
+    echo "==> Applying Trivalent patch: ${_trivalent_patch#"$srcdir/trivalent/patches/"}"
+    patch -Np1 -i "$_trivalent_patch"
+  done < <(find "$srcdir/Trivalent-94682b5d44f88dc70458ddd0bad79c4a961b4132/patches" -type f -name '*.patch' \
+             -not -path '*/fedora/*' \
+             -not -path '*/fixes/*' \
+             -not -path '*/branding/*' \
+             -print0 | sort -z)
 
   # Link to system tools required by the build
   mkdir -p third_party/node/linux/node-linux-x64/bin \
@@ -277,6 +277,9 @@ prepare() {
   # remove x86_64 binary and use our own
   rm -f third_party/gperf/cipd/bin/gperf
   ln -s /usr/bin/gperf third_party/gperf/cipd/bin/
+
+  rm -rf third_party/devtools-frontend/src/node_modules/esbuild/
+  ln -s /usr/lib/node_modules/esbuild/ third_party/devtools-frontend/src/node_modules/esbuild
 
   if (( !_system_clang )); then
     # Use prebuilt rust as system rust cannot be used due to the error:
@@ -352,6 +355,21 @@ build() {
     'moc_qt6_path="/usr/lib/qt6"'
     "google_api_key=\"$_google_api_key\""
     'use_clang_modules=false'
+    'is_clang=true'
+    'v8_enable_drumbrake=true'
+    'enable_reporting=false'
+    'enable_remoting=false'
+    'enable_vr=false'
+    'safe_browsing_use_unrar=false'
+    'is_cfi=true'
+    'use_cfi_cast=true'
+    'use_static_angle=true'
+    'angle_shared_libvulkan=false'
+    'enable_swiftshader=false'
+    'enable_swiftshader_vulkan=false'
+    'dawn_use_swiftshader=false'
+    'angle_enable_swiftshader=false'
+    'angle_has_histograms=false'
   )
 
   if [[ -n ${_system_libs[icu]+set} ]]; then
@@ -395,14 +413,7 @@ build() {
 
   # https://github.com/ungoogled-software/ungoogled-chromium-archlinux/issues/123
   CFLAGS=${CFLAGS/-fexceptions}
-  CFLAGS=${CFLAGS/-fcf-protection}
   CXXFLAGS=${CXXFLAGS/-fexceptions}
-  CXXFLAGS=${CXXFLAGS/-fcf-protection}
-
-  # This appears to cause random segfaults when combined with ThinLTO
-  # https://bugs.archlinux.org/task/73518
-  CFLAGS=${CFLAGS/-fstack-clash-protection}
-  CXXFLAGS=${CXXFLAGS/-fstack-clash-protection}
 
   # https://crbug.com/957519#c122
   CXXFLAGS=${CXXFLAGS/-Wp,-D_GLIBCXX_ASSERTIONS}
@@ -439,7 +450,8 @@ package() {
   sed -i \
     -e 's/@@MENUNAME/Chromium/g' \
     -e 's/@@PACKAGE/chromium/g' \
-    -e 's/@@usr_bin_symlink_name/chromium/g' \
+    -e 's/@@desktop_exec/chromium/g' \
+    -e 's/@@desktop_icon/chromium/g' \
     -e 's|@@uri_scheme|x-scheme-handler/chromium;|g' \
     -e 's/@@extra_desktop_entries//g' \
     "$pkgdir/usr/share/applications/chromium.desktop" \
@@ -466,11 +478,6 @@ package() {
     # ANGLE
     libEGL.so
     libGLESv2.so
-
-    # SwiftShader ICD
-    libvk_swiftshader.so
-    libvulkan.so.1
-    vk_swiftshader_icd.json
   )
 
   if [[ -z ${_system_libs[icu]+set} ]]; then
