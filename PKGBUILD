@@ -8,7 +8,7 @@
 # Contributor: Caleb Maclennan <caleb@alerque.com>
 
 pkgname=chromium
-pkgver=154.0.8037.92
+pkgver=154.0.8037.97
 pkgrel=1
 _launcher_ver=8
 _manual_clone=0
@@ -83,9 +83,9 @@ optdepends=('pipewire: WebRTC desktop sharing under Wayland'
             'org.freedesktop.secrets: password storage backend on GNOME, KDE and Xfce'
             'upower: Battery Status API support')
 options=('!lto') # Chromium adds its own flags for ThinLTO
-source=(https://github.com/chromium-linux-tarballs/chromium-tarballs/releases/download/$pkgver/chromium-$pkgver-linux.tar.xz
+source=(https://commondatastorage.googleapis.com/chromium-browser-official/chromium-$pkgver-lite.tar.xz
         https://github.com/foutrelis/chromium-launcher/archive/v$_launcher_ver/chromium-launcher-$_launcher_ver.tar.gz
-        https://github.com/secureblue/Trivalent/archive/8651c6957db032613e2c19d16d3523db4b374c98.tar.gz
+        https://github.com/secureblue/Trivalent/archive/04588735aecab6f4387e4960947df524c7d04de7.tar.gz
         chromium-138-nodejs-version-check.patch
         chromium-145-fix-SYS_SECCOMP.patch
         chromium-147-revert-clang-no-lifetime-dse-flag.patch
@@ -108,9 +108,9 @@ source=(https://github.com/chromium-linux-tarballs/chromium-tarballs/releases/do
         enable-widevine-arm64.patch
         use-oauth2-client-switches-as-default.patch
         glibc-2.42-baud-rate-fix.patch)
-sha256sums=('5c21ef0ab5829a54bf62c39c6cef7a816c9edf55a2442b623a161ec6fa336e37'
+sha256sums=('d3679fa6ed356c7d701fae03eb39c7b6905c7c4abe46eadd998985825b91dc4b'
             '213e50f48b67feb4441078d50b0fd431df34323be15be97c55302d3fdac4483a'
-            '6d4e8c55f36ee89aaf2194ab3d43452b47e5385f473371b2a93ae44b966fdaa0'
+            '3f725156255f3d11f7d1a6e6b66fa75a9e573485dddbd52c1b725eebf448f6b2'
             '11a96ffa21448ec4c63dd5c8d6795a1998d8e5cd5a689d91aea4d2bdd13fb06e'
             '4fc040a0656a0a524dd8ad090cd129fc5b6cb21adcc66be82080165789e8c13e'
             'c382830318c5b37826ecf44f3ba9def6be8affdad1bce819ecb83f3222ff4b3a'
@@ -255,7 +255,7 @@ prepare() {
   while IFS= read -r -d '' _trivalent_patch; do
     echo "==> Applying Trivalent patch: ${_trivalent_patch#"$srcdir/trivalent/patches/"}"
     patch -Np1 -i "$_trivalent_patch"
-  done < <(find "$srcdir/Trivalent-8651c6957db032613e2c19d16d3523db4b374c98/patches" -type f -name '*.patch' \
+  done < <(find "$srcdir/Trivalent-04588735aecab6f4387e4960947df524c7d04de7/patches" -type f -name '*.patch' \
              -not -path '*/fedora/*' \
              -not -path '*/fixes/*' \
              -not -path '*/branding/*' \
