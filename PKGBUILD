@@ -8,7 +8,7 @@
 # Contributor: Caleb Maclennan <caleb@alerque.com>
 
 pkgname=chromium
-pkgver=156.0.8078.47
+pkgver=156.0.8078.73
 pkgrel=1
 _launcher_ver=8
 _manual_clone=0
@@ -107,7 +107,7 @@ source=(https://commondatastorage.googleapis.com/chromium-browser-official/chrom
         enable-widevine-arm64.patch
         use-oauth2-client-switches-as-default.patch
         glibc-2.42-baud-rate-fix.patch)
-sha256sums=('28432028890ef70e1f2e9db880c500907ad1b04f5ae6b655a3f394b9f2eaa705'
+sha256sums=('cfdf8def1207b81af1231e5170bf849896cd353e72220ca05d93432e31551d59'
             '213e50f48b67feb4441078d50b0fd431df34323be15be97c55302d3fdac4483a'
             '32e37d48679e642e738112a3479780ed6af6b28e8b20f6d15056a7cd18315e21'
             '11a96ffa21448ec4c63dd5c8d6795a1998d8e5cd5a689d91aea4d2bdd13fb06e'
