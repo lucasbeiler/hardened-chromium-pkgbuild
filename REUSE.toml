@@ -21,9 +21,7 @@ path = [
     "*.desktop",
     "*.hook",
     "fetch-chromium-release",
-    "enable-widevine-arm64.patch",
     "glibc-2.42-baud-rate-fix.patch",
-    "chromium-153-iamf-tools-unbundled-opus.patch",
 ]
 SPDX-FileCopyrightText = "Arch Linux contributors"
 SPDX-License-Identifier = "0BSD"
@@ -31,15 +29,7 @@ SPDX-License-Identifier = "0BSD"
 [[annotations]]
 path = [
     "chromium-138-nodejs-version-check.patch",
-    "chromium-144-fix-hdr-issue.patch",
     "chromium-145-fix-SYS_SECCOMP.patch",
-    "chromium-147-simdutf-8.0-base-char.patch",
-    "compiler-rt-adjust-paths.patch",
-    "increase-fortify-level.patch",
-    "use-oauth2-client-switches-as-default.patch",
-    "chromium-150-revert-avx-flag-change.patch",
-    "chromium-152-unbundle-minizip-undo-unicode.patch",
-    "chromium-152-unbundle-opus-devtools.patch",
 ]
 SPDX-FileCopyrightText = "chromium contributors"
 SPDX-License-Identifier = "BSD-3-Clause"
@@ -47,22 +37,10 @@ SPDX-License-Identifier = "BSD-3-Clause"
 [[annotations]]
 path = [
     "chromium-153-hermetic-python.patch",
-    "chromium-155-use-system-esbuild.patch",
-    "chromium-156-crubit.patch",
-    "chromium-156-remove-private_verification_tokens.patch",
     "chromium-156-revert-gn-check-includes.patch",
-    "chromium-156-typescript.patch",
-    "chromium-156-isolatedDeclarations.patch",
 ]
 SPDX-FileCopyrightText = "2015-2026 The ungoogled-chromium Authors"
 SPDX-License-Identifier = "BSD-3-Clause"
-
-[[annotations]]
-path = [
-    "chromium-147-rust-1.95-bytemuck.patch",
-]
-SPDX-FileCopyrightText = "2015-2026 The void linux Authors"
-SPDX-License-Identifier = "BSD-2-Clause"
 
 [[annotations]]
 path = [
