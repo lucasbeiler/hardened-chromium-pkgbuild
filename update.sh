@@ -33,14 +33,6 @@ if [[ ! "$COMMIT" =~ ^[0-9a-f]{40}$ ]]; then
   exit 1
 fi
 
-# Current version in the PKGBUILD
-CURRENT=$(sed -n 's/^pkgver=//p' "$PKGBUILD")
-
-if [[ "$CURRENT" == "$VERSION" ]]; then
-  echo "PKGBUILD is already at version $VERSION, nothing to do."
-  exit 0
-fi
-
 # Fetch Clang and Rust revisions from the Chromium tag
 CHROMIUM_RAW="https://raw.githubusercontent.com/chromium/chromium/refs/tags/$VERSION/tools"
 CLANG_PY=$(curl -fsS "$CHROMIUM_RAW/clang/scripts/update.py")
@@ -66,7 +58,7 @@ for sub in "$CLANG_SUB" "$RUST_SUB"; do
   fi
 done
 
-echo "Updating $CURRENT -> $VERSION ($COMMIT)"
+echo "Updating to $VERSION ($COMMIT)"
 echo "  clang: $CLANG_REV (sub $CLANG_SUB)"
 echo "  rust:  $RUST_REV (sub $RUST_SUB)"
 
@@ -112,6 +104,6 @@ curl -LO --url "$TOOLCHAIN_BASE/$CLANG_FILE"
 curl -LO --url "$TOOLCHAIN_BASE/$RUST_FILE"
 
 # Update checksums and .SRCINFO, then commit (requires pacman-contrib)
-(cd "$PKGDIR" && updpkgsums && rm -f *.tar.xz && makepkg --printsrcinfo > .SRCINFO && git add . && git commit -a -m "Update to ${VERSION}")
+(cd "$PKGDIR" && updpkgsums && rm -f *.tar.* && makepkg --printsrcinfo > .SRCINFO && git add . && git commit -a -m "Update to ${VERSION}")
 
 echo "Done."
