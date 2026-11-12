@@ -8,7 +8,7 @@
 # Hardening patches from Trivalent: https://github.com/secureblue/Trivalent
 
 pkgname=chromium
-pkgver=157.0.8103.50
+pkgver=157.0.8103.78
 pkgrel=1
 _launcher_ver=8
 
@@ -25,7 +25,7 @@ _clang_tarball="clang-${_clang_pkg}.tar.xz"
 _rust_tarball="rust-toolchain-${_rust_pkg}.tar.xz"
 
 # Trivalent hardening patches (https://github.com/secureblue/Trivalent)
-_trivalent_commit=9994318f57b4f63f20b98321a51685fe9e5744f0
+_trivalent_commit=88c167f47be95a818265aa7b72619230a597e986
 
 pkgdesc="A web browser built for speed, simplicity, and security"
 arch=('x86_64')
@@ -105,11 +105,11 @@ source=(https://commondatastorage.googleapis.com/chromium-browser-official/chrom
         chromium-153-hermetic-python.patch
         chromium-157-revert-gn-check-includes.patch
         glibc-2.42-baud-rate-fix.patch)
-sha256sums=('6511dc3808736004f03a82397a2fa251757f4b6632e2d848bc79ee25b77c7f0f'
+sha256sums=('9fdce9d3c866f97f14f7a4250915e8e5b729dc952fcfb3a35507b126233f0660'
             'ab8ec1e75c7f74565e9f893212262780abc9174363ce5f1ff670c415e9cd4147'
             '6287ecced3bc5113122a88dbe15c910edec0828718423a67529c24de0f060e98'
             '213e50f48b67feb4441078d50b0fd431df34323be15be97c55302d3fdac4483a'
-            '7dd32197456a6287f652c843f0d6214de5d05e2c7b8c0c8e8f08f6898f6b6773'
+            '0e1659cd75a85e23bd6360cd9228eebdcb96d829d5d26c0f2a8fb8bdb7fef254'
             '11a96ffa21448ec4c63dd5c8d6795a1998d8e5cd5a689d91aea4d2bdd13fb06e'
             '4fc040a0656a0a524dd8ad090cd129fc5b6cb21adcc66be82080165789e8c13e'
             '951514535be65f0e2f84e82305d96292be1da353c1427ba1048ea24be70003c4'
