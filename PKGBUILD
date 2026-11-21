@@ -8,24 +8,24 @@
 # Hardening patches from Trivalent: https://github.com/secureblue/Trivalent
 
 pkgname=chromium
-pkgver=157.0.8103.78
+pkgver=158.0.8127.36
 pkgrel=1
 _launcher_ver=8
 
 # Official Chromium toolchain revisions:
 #   tools/clang/scripts/update.py -> CLANG_REVISION / CLANG_SUB_REVISION
 #   tools/rust/update_rust.py     -> RUST_REVISION  / RUST_SUB_REVISION
-_clang_rev=llvmorg-24-init-7747-g62397f8b
-_clang_sub=67
-_rust_rev=1edd55dcfcd573872c727fa3e086369a71661ee0
-_rust_sub=1125
+_clang_rev=llvmorg-24-init-14453-ge063be79
+_clang_sub=1
+_rust_rev=8a9dd7abdf013ec10cfeaaa3685feba18ef1c90c
+_rust_sub=1
 _clang_pkg="${_clang_rev}-${_clang_sub}"
 _rust_pkg="${_rust_rev}-${_rust_sub}-${_clang_rev}"
 _clang_tarball="clang-${_clang_pkg}.tar.xz"
 _rust_tarball="rust-toolchain-${_rust_pkg}.tar.xz"
 
 # Trivalent hardening patches (https://github.com/secureblue/Trivalent)
-_trivalent_commit=88c167f47be95a818265aa7b72619230a597e986
+_trivalent_commit=00c1bd6c681c85020e24505823680380e0693fbf
 
 pkgdesc="A web browser built for speed, simplicity, and security"
 arch=('x86_64')
@@ -70,6 +70,7 @@ depends=(
   'zlib'
 )
 makedepends=(
+  'clang'
   'git'
   'gn'
   'go'
@@ -101,20 +102,18 @@ source=(https://commondatastorage.googleapis.com/chromium-browser-official/chrom
         https://github.com/secureblue/Trivalent/archive/$_trivalent_commit.tar.gz
         chromium-138-nodejs-version-check.patch
         chromium-145-fix-SYS_SECCOMP.patch
-        chromium-149-use-of-undeclared-identifier-ERROR.patch
         chromium-153-hermetic-python.patch
-        chromium-157-revert-gn-check-includes.patch
+        chromium-158-revert-gn-check-includes.patch
         glibc-2.42-baud-rate-fix.patch)
-sha256sums=('9fdce9d3c866f97f14f7a4250915e8e5b729dc952fcfb3a35507b126233f0660'
-            'ab8ec1e75c7f74565e9f893212262780abc9174363ce5f1ff670c415e9cd4147'
-            '6287ecced3bc5113122a88dbe15c910edec0828718423a67529c24de0f060e98'
+sha256sums=('8a93030a68231ea046479c47d6b26dfae43becef1b5343cf95f8146109291d6d'
+            '0b76afc1a29b0583f7723e966b9b65a22b15d8fdcd38e7c567ae32343c68944d'
+            '3f62ea86b027923b1fce17ac2ef002d1788b608245003440b46558a8e735b83d'
             '213e50f48b67feb4441078d50b0fd431df34323be15be97c55302d3fdac4483a'
-            '0e1659cd75a85e23bd6360cd9228eebdcb96d829d5d26c0f2a8fb8bdb7fef254'
+            'e93e26730c9b2989d36bd7129dda0ab6c70d088e394166d5d8f68f4db564030e'
             '11a96ffa21448ec4c63dd5c8d6795a1998d8e5cd5a689d91aea4d2bdd13fb06e'
             '4fc040a0656a0a524dd8ad090cd129fc5b6cb21adcc66be82080165789e8c13e'
-            '951514535be65f0e2f84e82305d96292be1da353c1427ba1048ea24be70003c4'
             'ebf74154266d0b6d6cc957c413f845052c5fcfce7745befb8821595cdf3f7d49'
-            '3b663878c6b05e612ba103152c48f91dde27cabe7d55ba48427a72829ff4922f'
+            'a41079e62008c016c179643f085107a55b095c8e2d64867b701ff0047951b0b6'
             '1c1898f263eaacbc069a8e1a3e732852350350d1dad4cb1a6bba430e3b796cd0')
 
 # Possible replacements are listed in build/linux/unbundle/replace_gn_files.py
@@ -152,13 +151,11 @@ prepare() {
   # https://crbug.com/456677057
   patch -Np1 -i ../glibc-2.42-baud-rate-fix.patch
 
-  patch -Np1 -i ../chromium-149-use-of-undeclared-identifier-ERROR.patch
-
   # Use system python3 instead of the hermetic cpython3 interpreter
   # https://github.com/ungoogled-software/ungoogled-chromium/pull/3946
   patch -Np1 -i ../chromium-153-hermetic-python.patch
 
-  patch -Np1 -i ../chromium-157-revert-gn-check-includes.patch
+  patch -Np1 -i ../chromium-158-revert-gn-check-includes.patch
 
   # Trivalent hardening patches (https://github.com/secureblue/Trivalent)
   # Apply every *.patch under patches/, skipping anything that lives inside a
@@ -210,6 +207,26 @@ prepare() {
     ln -sf /usr/bin/go third_party/dawn/tools/golang/linux-amd64/bin/go
   [[ -x third_party/gperf/cipd/bin/gperf ]] ||
     ln -sf /usr/bin/gperf third_party/gperf/cipd/bin/gperf
+
+  # V8 metagen needs libclang's python bindings
+  local _bindings=third_party/llvm-libclang/bindings/python
+  local _cindex
+  _cindex=$(find third_party/llvm-build/Release+Asserts -name cindex.py -print -quit)
+  if [[ -z $_cindex ]]; then
+    _cindex=$(find /usr/lib/python3*/site-packages/clang -name cindex.py -print -quit 2>/dev/null)
+  fi
+  [[ -n $_cindex ]] || { echo "cindex.py not found"; return 1; }
+  rm -rf "$_bindings/clang"
+  mkdir -p "$_bindings"
+  cp -r "$(dirname "$_cindex")" "$_bindings/clang"
+
+  local _libclang
+  _libclang=$(find third_party/llvm-build/Release+Asserts/lib third_party/rust-toolchain/lib \
+                -name 'libclang.so' -print -quit 2>/dev/null || true)
+  [[ -n $_libclang ]] || _libclang=$(find /usr/lib -maxdepth 1 -name 'libclang.so' -print -quit 2>/dev/null || true)
+  [[ -n $_libclang ]] || { echo "libclang.so not found"; return 1; }
+  mkdir -p third_party/llvm-libclang/lib/
+  ln -sf "$(realpath "$_libclang")" third_party/llvm-libclang/lib/libclang.so
 
   # Remove bundled libraries for which we will use the system copies; this
   # *should* do what the remove_bundled_libraries.py script does, with the
